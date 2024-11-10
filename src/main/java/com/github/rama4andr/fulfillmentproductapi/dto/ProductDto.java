@@ -1,4 +1,23 @@
 package com.github.rama4andr.fulfillmentproductapi.dto;
 
-public record ProductDto(String productId, String status, String fulfillmentCenter, Integer quantity, Double value) {
-}
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record ProductDto(
+
+        @NotNull
+        @Size(max = 50)
+        String productId,
+
+        @NotNull
+        String status,
+
+        @NotNull
+        String fulfillmentCenter,
+
+        @NotNull
+        Integer quantity,
+
+        @NotNull
+        Double value
+) {}

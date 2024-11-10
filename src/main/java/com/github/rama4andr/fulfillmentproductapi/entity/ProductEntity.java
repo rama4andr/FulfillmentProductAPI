@@ -28,8 +28,6 @@ public class ProductEntity {
     private Long id;
 
     @Column(name = "product_id")
-    @NotNull
-    @Size(max = 50)
     private String productId;
 
     @Column(name = "status")

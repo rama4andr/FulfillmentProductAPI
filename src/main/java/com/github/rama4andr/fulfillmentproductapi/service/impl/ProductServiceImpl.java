@@ -2,39 +2,32 @@ package com.github.rama4andr.fulfillmentproductapi.service.impl;
 
 import com.github.rama4andr.fulfillmentproductapi.dto.ProductDto;
 import com.github.rama4andr.fulfillmentproductapi.entity.ProductEntity;
+import com.github.rama4andr.fulfillmentproductapi.exception.ProductNotFoundException;
 import com.github.rama4andr.fulfillmentproductapi.repository.ProductEntityRepository;
 import com.github.rama4andr.fulfillmentproductapi.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductEntityRepository productEntityRepository;
-
-    public ProductServiceImpl(ProductEntityRepository productEntityRepository) {
-        this.productEntityRepository = productEntityRepository;
-    }
 
     @Override
     public List<ProductDto> getAll() {
         List<ProductEntity> all = productEntityRepository.findAllByDeletedFalse();
 
-        if (!all.isEmpty()) {
-            return all.stream()
-                    .map(this::entityToDto)
-                    .toList();
-        } else {
-            throw new IllegalStateException("No products found");
-        }
+        return all.stream()
+                .map(this::entityToDto)
+                .toList();
     }
 
     @Override
     public ProductDto getById(Long id) {
-
-        ProductEntity productEntity = productEntityRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("No product found with id: " + id));
+        ProductEntity productEntity = getProductEntity(id);
 
         return entityToDto(productEntity);
     }
@@ -48,14 +41,27 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto update(Long id, ProductDto productDto) {
-        ProductEntity productEntity = productEntityRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("No product found with id: " + id));
+        ProductEntity productEntity = getProductEntity(id);
 
-        productEntity.setProductId(productDto.productId());
-        productEntity.setStatus(productDto.status());
-        productEntity.setFulfillmentCenter(productDto.fulfillmentCenter());
-        productEntity.setQuantity(productDto.quantity());
-        productEntity.setValue(productDto.value());
+        if (productDto.productId() != null) {
+            productEntity.setProductId(productDto.productId());
+        }
+
+        if (productDto.status() != null) {
+            productEntity.setStatus(productDto.status());
+        }
+
+        if (productDto.fulfillmentCenter() != null) {
+            productEntity.setFulfillmentCenter(productDto.fulfillmentCenter());
+        }
+
+        if (productDto.quantity() != null) {
+            productEntity.setQuantity(productDto.quantity());
+        }
+
+        if (productDto.value() != null) {
+            productEntity.setValue(productDto.value());
+        }
 
         ProductEntity updatedEntity = productEntityRepository.save(productEntity);
         return entityToDto(updatedEntity);
@@ -63,8 +69,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(Long id) {
-        ProductEntity productEntity = productEntityRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("No product found with id: " + id));
+        ProductEntity productEntity = getProductEntity(id);
 
         productEntity.setDeleted(true);
         productEntityRepository.save(productEntity);
@@ -74,26 +79,23 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductsByStatus(String status) {
         List<ProductEntity> byStatus = productEntityRepository.findByStatus(status);
 
-        if (!byStatus.isEmpty()) {
-            return byStatus.stream()
-                    .map(this::entityToDto)
-                    .toList();
-        } else {
-            throw new IllegalStateException("No products found");
-        }
+        return byStatus.stream()
+                .map(this::entityToDto)
+                .toList();
     }
 
     @Override
     public Double getTotalValueForSellableProducts(String status) {
         List<ProductEntity> byStatus = productEntityRepository.findByStatus(status);
 
-        if (!byStatus.isEmpty()) {
-            return byStatus.stream()
-                    .mapToDouble(ProductEntity::getValue)
-                    .sum();
-        } else {
-            throw new IllegalStateException("No products found");
-        }
+        return byStatus.stream()
+                .mapToDouble(ProductEntity::getValue)
+                .sum();
+    }
+
+    private ProductEntity getProductEntity(Long id) {
+        return productEntityRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     private ProductDto entityToDto(ProductEntity productEntity) {
