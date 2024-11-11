@@ -37,10 +37,11 @@ git clone https://github.com/rama4andr/FulfillmentProductAPI.git
 2. **Создайте файл .env для конфигурации переменных окружения:**
 
 ```env
-POSTGRES_USER=your_user
-POSTGRES_PASSWORD=your_password
 POSTGRES_DB=productsdb
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/productsdb
+POSTGRES_USER=root
+POSTGRES_PASSWORD=rootpass
+HOST=postgres
+PORT=5432
 ```
 Замените `your_user` и `your_password` на ваши значения.
 
