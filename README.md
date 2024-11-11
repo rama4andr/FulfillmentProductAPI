@@ -31,8 +31,7 @@ API для управления продуктами в различных це�
 
 1. **Клонируйте репозиторий проекта:**
 ```bash
-git clone <URL_вашего_репозитория>
-cd <папка_вашего_проекта>
+git clone https://github.com/rama4andr/FulfillmentProductAPI.git
 ```
 
 2. **Создайте файл .env для конфигурации переменных окружения:**
@@ -54,13 +53,13 @@ SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/productsdb
 Поднимите контейнер Docker c БД PostgreSQL при помощи команды:
 ```bash
 docker run -d \
--name postgres-container \
-e POSTGRES_USER=${POSTGRES_USER} \
-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-e POSTGRES_DB=${POSTGRES_DB} \
-p 5432:5432 \
-v postgres-data:/var/lib/postgresql/data \
-ostgres:13
+  --name postgres-container \
+  -e POSTGRES_USER=${POSTGRES_USER} \
+  -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+  -e POSTGRES_DB=${POSTGRES_DB} \
+  -p 5432:5432 \
+  -v postgres-data:/var/lib/postgresql/data \
+  postgres:13
 ```
 Запустите приложение с помощью команды:
 ```mvn spring-boot:run```
