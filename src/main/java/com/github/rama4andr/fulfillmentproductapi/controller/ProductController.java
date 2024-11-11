@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,6 +30,8 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+
+    private static final String SELLABLE = "Sellable";
 
     @GetMapping()
     @Operation(summary = "Get all products")
@@ -92,7 +97,9 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Products received successfully"),
             @ApiResponse(responseCode = "404", description = "Products not found")
     })
-    public ResponseEntity<List<ProductDto>> getByStatus(@PathVariable String status) {
+    public ResponseEntity<List<ProductDto>> getByStatus(@PathVariable
+                                                        @NotNull
+                                                        @NotBlank String status) {
         List<ProductDto> allByStatus = productService.getProductsByStatus(status);
 
         if (allByStatus.isEmpty()) {
@@ -101,18 +108,21 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(allByStatus);
     }
 
-    @GetMapping("/total-value/{status}")
+    @GetMapping("/total-value")
     @Operation(summary = "Get total value by status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Total value received successfully"),
             @ApiResponse(responseCode = "404", description = "Products not found with current status")
     })
-    public ResponseEntity<Double> getTotalValue(@PathVariable String status) {
+    public ResponseEntity<Double> getTotalValue(@RequestParam(value = "status", defaultValue = SELLABLE)
+                                                @NotNull
+                                                @NotBlank String status) {
         Double totalValueForSellableProducts = productService.getTotalValueForSellableProducts(status);
 
-        if (totalValueForSellableProducts == null) {
-            throw new ProductNotFoundException();
+        if (totalValueForSellableProducts == null || totalValueForSellableProducts == 0.0) {
+            throw new ProductNotFoundException("No products found for status: " + status);
         }
+
         return ResponseEntity.status(HttpStatus.OK).body(totalValueForSellableProducts);
     }
 }

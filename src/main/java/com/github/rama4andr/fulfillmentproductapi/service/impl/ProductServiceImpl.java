@@ -88,6 +88,10 @@ public class ProductServiceImpl implements ProductService {
     public Double getTotalValueForSellableProducts(String status) {
         List<ProductEntity> byStatus = productEntityRepository.findByStatus(status);
 
+        if (byStatus.isEmpty()) {
+            return null;
+        }
+
         return byStatus.stream()
                 .mapToDouble(ProductEntity::getValue)
                 .sum();
